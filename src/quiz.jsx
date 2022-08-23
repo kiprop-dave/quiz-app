@@ -8,6 +8,7 @@ export default function QuizPage(props){
     const [apiData, setApiData] = useState({})
     const {category,difficulty,type} = props.quizOptions; //stores the user inputs to state
     const [score,setScore] = useState(0)
+    const [isCorrect, setIscorrect] = useState(true)
     
 
     useEffect(() =>{
@@ -23,7 +24,7 @@ export default function QuizPage(props){
     useEffect(
         () => {
             setQuestionsArray(questionsArrayInit)
-        },[results]
+        },[results,isCorrect]
     )
     
 
@@ -48,7 +49,7 @@ export default function QuizPage(props){
                     answer:thisAnswer,
                     answerCorrect: correctAnswer,
                     isSelected: false,
-                    isCorrect: thisAnswer === correctAnswer ? true : false
+                    isCorrect: thisAnswer === correctAnswer ? isCorrect : false
                 }
             )
         })
@@ -74,12 +75,26 @@ export default function QuizPage(props){
         return array;
     }
 
-   
+
 
     function handleSubmit(){
-       console.log(questionsArray[0])
+        // setQuestionsArray(prevArray =>{
+        //     return(
+        //         prevArray?.map(thisQuestionObject =>{
+        //             return(
+        //                 {
+        //                     ...thisQuestionObject,
+        //                     allAnswers: [{},{},{},{},{}]
+        //                 }
+        //             )
+        //         })
+        //     )
+        // })
+        setIscorrect(prevstate => !prevstate)
+       //console.log(questionsArray[0])
         //props.newQuiz()
     }
+    //console.log(score)
 
 
     const questions = questionsArray?.map(thisQuestionObject =>{
@@ -87,6 +102,7 @@ export default function QuizPage(props){
             <Questions
                 key = {thisQuestionObject.id}
                 questionAnswers = {thisQuestionObject}
+                
             />
         )
     })
@@ -96,6 +112,7 @@ export default function QuizPage(props){
         <div className="question-page">
             <div className="questions-container">
                 {questions}
+                
             </div>
             <button className="checkanswers" onClick={() => handleSubmit()}
                 

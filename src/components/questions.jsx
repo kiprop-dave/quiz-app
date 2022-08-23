@@ -14,11 +14,14 @@ export default function Questions(props){
                 key = {thisAnswer.id}
                 answer = {thisAnswer}
                 handleChoice = {() =>handleChoice(thisAnswer.id)}
+                
             />
             
         )
     })
 
+
+    //This function handles the user selection
     function handleChoice(id){
         setAllAnswers(prevArray =>{
             return(
