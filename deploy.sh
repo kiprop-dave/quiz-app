@@ -16,8 +16,8 @@ set -e
 #git init
 #git remote add origin https://github.com/kiprop-dave/quiz-app.git
 git add -A
-git commit -m 'some changes'
+git commit -m 'fixed issues'
 #git branch -M development
 git push -u origin development
 
-cd -
+#cd -

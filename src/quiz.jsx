@@ -8,7 +8,7 @@ export default function QuizPage(props){
     const [apiData, setApiData] = useState({})
     const {category,difficulty,type} = props.quizOptions; //stores the user inputs to state
     const [score,setScore] = useState(0)
-    const [isCorrect, setIscorrect] = useState(true)
+    const [isCorrect, setIscorrect] = useState(false)
     
 
     useEffect(() =>{
