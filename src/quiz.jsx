@@ -8,11 +8,12 @@ export default function QuizPage(props){
     const [apiData, setApiData] = useState({})
     const {category,difficulty,type} = props.quizOptions; //stores the user inputs to state
     const [score,setScore] = useState(0)
-    const [isCorrect, setIscorrect] = useState(false)
+    const [allAnswered, setAllAnswered] = useState(false)
+    
     
 
     useEffect(() =>{
-        fetch(`https://opentdb.com/api.php?amount=5&category=${category}&difficulty=${difficulty}&type=${type}`)
+        fetch(`https://opentdb.com/api.php?amount=2&category=${category}&difficulty=${difficulty}&type=${type}`)
           .then(res => res.json())
           .then(data => setApiData(data))
       },[])
@@ -24,8 +25,21 @@ export default function QuizPage(props){
     useEffect(
         () => {
             setQuestionsArray(questionsArrayInit)
-        },[results,isCorrect]
+        },[results]
     )
+
+    useEffect(() =>{
+        const questionAnswered = questionsArray?.every(quiz => quiz.isAnswered)
+        //console.log(questionAnswered)
+        if(questionAnswered){
+            setAllAnswered(prev => !prev)
+            //console.log(questionAnswered)
+        }
+        else{
+            setAllAnswered(false)
+        }
+    },[questionsArray])
+   // console.log(score)
     
 
     const questionsArrayInit = results?.map(thisQuestionObject =>{
@@ -33,7 +47,7 @@ export default function QuizPage(props){
             {
                 id: nanoid(),
                 question: thisQuestionObject.question,
-                isShown: false,
+                isAnswered: false,
                 allAnswers: createAllAnswers(thisQuestionObject.incorrect_answers,thisQuestionObject.correct_answer)
             }
         )
@@ -49,7 +63,7 @@ export default function QuizPage(props){
                     answer:thisAnswer,
                     answerCorrect: correctAnswer,
                     isSelected: false,
-                    isCorrect: thisAnswer === correctAnswer ? isCorrect : false
+                    isCorrect: false
                 }
             )
         })
@@ -75,26 +89,72 @@ export default function QuizPage(props){
         return array;
     }
 
+    
 
+    function checkScore(){
+        questionsArray.forEach(thisQuestionObject => {
+            const {allAnswers} = thisQuestionObject
+            allAnswers.forEach(thisAnswer => {
+                const {isSelected, isCorrect} = thisAnswer
+                if(isCorrect && isSelected){
+                    setScore(prev => prev +1)
+                }else{
+                    setScore(prev => prev)
+                }
+            })
+        })
+    }
 
     function handleSubmit(){
-        // setQuestionsArray(prevArray =>{
-        //     return(
-        //         prevArray?.map(thisQuestionObject =>{
-        //             return(
-        //                 {
-        //                     ...thisQuestionObject,
-        //                     allAnswers: [{},{},{},{},{}]
-        //                 }
-        //             )
-        //         })
-        //     )
-        // })
-        setIscorrect(prevstate => !prevstate)
-       //console.log(questionsArray[0])
-        //props.newQuiz()
+        checkScore()
+       // console.log(score)
+        setQuestionsArray(prevArr => {
+            return prevArr.map(thisQuestionObject => {
+                const {allAnswers} = thisQuestionObject
+                const allAnswersCopy = [...allAnswers]
+                const newAnswers = allAnswersCopy.map(thisAnswer => ({
+                    ...thisAnswer,
+                    isCorrect: thisAnswer.answerCorrect === thisAnswer.answer ? true : false
+                }))
+                return {
+                    ...thisQuestionObject,
+                    allAnswers: newAnswers
+                }
+            })
+        })
+        
     }
-    //console.log(score)
+
+  
+    function handleChoice(questionId, answerId){
+        setQuestionsArray(prevArr => {
+            return prevArr.map(thisQuestionObject => {
+                const {allAnswers} = thisQuestionObject
+                const newAnswers = allAnswers.map(thisAnswer => {
+                    return (
+                        thisAnswer.id === answerId ? 
+                        {
+                            ...thisAnswer,
+                            isSelected: !thisAnswer.isSelected,
+                        } : 
+                        {
+                            ...thisAnswer,
+                            isSelected: thisAnswer.isSelected ? true : false
+                        }
+                    )
+                })
+                return (
+                    thisQuestionObject.id === questionId ?
+                    {
+                        ...thisQuestionObject,
+                        isAnswered: true,
+                        allAnswers: newAnswers
+                    } :
+                    thisQuestionObject
+                )
+            })
+        })
+    }
 
 
     const questions = questionsArray?.map(thisQuestionObject =>{
@@ -102,7 +162,7 @@ export default function QuizPage(props){
             <Questions
                 key = {thisQuestionObject.id}
                 questionAnswers = {thisQuestionObject}
-                
+                choice = {handleChoice}
             />
         )
     })
@@ -115,7 +175,7 @@ export default function QuizPage(props){
                 
             </div>
             <button className="checkanswers" onClick={() => handleSubmit()}
-                
+                disabled ={!allAnswered}
             >
                 Check answers</button>
         </div>

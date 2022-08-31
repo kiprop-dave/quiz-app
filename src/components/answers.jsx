@@ -1,13 +1,17 @@
+import React from "react";
 const parseEntities = txt => new DOMParser().parseFromString(txt, 'text/html').body.innerText;
 
-export default function Answers(props){
-    console.log(props.answer)
+function Answers(props){
+    //console.log(props.answer)
+    const {answer,isCorrect,isSelected} = props.answer
 
     const styles = {
-        backgroundColor: props.answer.isSelected ? "#D6DBF5" : props.answer.isCorrect ? "#94D7A2":"transparent"
+        backgroundColor: isSelected ? "#D6DBF5" : 
+            isCorrect ? "#94D7A2": 
+            isCorrect && isSelected ? "#FFA500" :
+            "transparent"
     }
 
-    const answer = props.answer.answer;
 
     return(
         <div >
@@ -18,3 +22,5 @@ export default function Answers(props){
         </div>
     )
 }
+
+export default Answers
