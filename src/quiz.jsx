@@ -13,7 +13,7 @@ export default function QuizPage(props){
     
 
     useEffect(() =>{
-        fetch(`https://opentdb.com/api.php?amount=2&category=${category}&difficulty=${difficulty}&type=${type}`)
+        fetch(`https://opentdb.com/api.php?amount=5&category=${category}&difficulty=${difficulty}&type=${type}`)
           .then(res => res.json())
           .then(data => setApiData(data))
       },[])
@@ -29,6 +29,7 @@ export default function QuizPage(props){
     )
 
     useEffect(() =>{
+       // console.log(checkScore(), "checkSCore")
         const questionAnswered = questionsArray?.every(quiz => quiz.isAnswered)
         //console.log(questionAnswered)
         if(questionAnswered){
@@ -39,7 +40,6 @@ export default function QuizPage(props){
             setAllAnswered(false)
         }
     },[questionsArray])
-   // console.log(score)
     
 
     const questionsArrayInit = results?.map(thisQuestionObject =>{
@@ -89,25 +89,22 @@ export default function QuizPage(props){
         return array;
     }
 
-    
-
     function checkScore(){
-        questionsArray.forEach(thisQuestionObject => {
+        let correctAnswer = 0
+        questionsArray?.map(thisQuestionObject => {
             const {allAnswers} = thisQuestionObject
-            allAnswers.forEach(thisAnswer => {
-                const {isSelected, isCorrect} = thisAnswer
+            allAnswers?.map(thisAnswer => {
+                const {isCorrect, isSelected} = thisAnswer
                 if(isCorrect && isSelected){
-                    setScore(prev => prev +1)
-                }else{
-                    setScore(prev => prev)
+                    correctAnswer ++
                 }
             })
         })
+        return correctAnswer
+        
     }
 
-    function handleSubmit(){
-        checkScore()
-       // console.log(score)
+    function checkAnswers(){
         setQuestionsArray(prevArr => {
             return prevArr.map(thisQuestionObject => {
                 const {allAnswers} = thisQuestionObject
@@ -122,7 +119,16 @@ export default function QuizPage(props){
                 }
             })
         })
-        
+    }
+
+    function handleSubmit(){
+        checkAnswers()
+        setTimeout(
+            () => {
+                setScore(prev => prev + checkScore())
+                //console.log(score, "submit")
+            },2000
+        )
     }
 
   
@@ -154,6 +160,7 @@ export default function QuizPage(props){
                 )
             })
         })
+       
     }
 
 
