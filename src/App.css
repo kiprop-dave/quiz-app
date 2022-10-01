@@ -2,12 +2,16 @@
     background: #F5F7FB;
     max-width: 100%;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .intro--page{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: inherit;
+    width: 100%;
   }
   .blob--upper{
     display: flex;
@@ -36,8 +40,6 @@
     grid-template-areas: 'a b c'
                          'd e f'
                          'g h i';
-    /* grid-template: repeat(3, 1fr)/ repeat(2, 1fr);
-    grid-template-columns: repeat(2, minmax(24px, 1fr)); */
   }
   
   .gameoptions > label{
@@ -79,17 +81,16 @@
     background-position: right top, left bottom;
     background-repeat: no-repeat, no-repeat;
     background-color: #F5F7FB;
-    max-width: 100%;
+    width: 100%;
     height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-left:  2% ;
-    padding-right: 2%;
+    padding: 0 2% 2% 2%;
    
   }
   .questions-container{
-    max-width: 650px;
+    max-width: 500px;
     margin-top: 10%;
     margin-bottom: 1%;
   }
@@ -101,6 +102,12 @@
     font-size: 16px;
     line-height: 20px;
     color: #293264; 
+  }
+
+  .separator{
+    height: 1px;
+    width: 100%;
+    border-bottom: solid 1px lightgray;
   }
   
   .answers-container{
@@ -134,12 +141,11 @@
     text-align: center;
     color: #F5F7FB;
     cursor: pointer;
-    margin-bottom: 20px;
-    align-self: center;
   }
   .checkanswers:focus {
     outline: none;
   }
+
   
   .checkanswers:active {
     box-shadow: inset 5px 5px 10px -3px rgba(0, 0, 0, 0.7);
@@ -147,6 +153,18 @@
 
   .checkanswers:disabled {
     cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .button-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+  }
+  .score{
+    margin-right: 2rem;
+    color: #1c2451;
   }
   
   @media screen and (max-width:500px) {

@@ -27,6 +27,42 @@ export const myData =
           "Terence Tao",
           "Edward Witten"
         ]
+      },
+      {
+        "category": "Science: Mathematics",
+        "type": "multiple",
+        "difficulty": "medium",
+        "question": "In the hexadecimal system, what number comes after 9?",
+        "correct_answer": "The Letter A",
+        "incorrect_answers": [
+          "10",
+          "The Number 0",
+          "16"
+        ]
+      },
+      {
+        "category": "Science: Mathematics",
+        "type": "multiple",
+        "difficulty": "medium",
+        "question": "In the hexadecimal system, what number comes after 9?",
+        "correct_answer": "The Letter A",
+        "incorrect_answers": [
+          "10",
+          "The Number 0",
+          "16"
+        ]
+      },
+      {
+        "category": "Science: Mathematics",
+        "type": "multiple",
+        "difficulty": "medium",
+        "question": "In the hexadecimal system, what number comes after 9?",
+        "correct_answer": "The Letter A",
+        "incorrect_answers": [
+          "10",
+          "The Number 0",
+          "16"
+        ]
       }
     ]
 }

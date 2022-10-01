@@ -1,66 +1,61 @@
-import {nanoid} from "nanoid"
+import { nanoid } from "nanoid"
 import { useEffect, useState } from "react"
 import Questions from "./components/questions"
-const parseEntities = txt => new DOMParser().parseFromString(txt, 'text/html').body.innerText;
+// const parseEntities = txt => new DOMParser().parseFromString(txt, 'text/html').body.innerText;
+import { myData } from "./data"
 
 
-export default function QuizPage(props){
+export default function QuizPage({ quizOptions, newQuiz }) {
     const [apiData, setApiData] = useState({})
-    const {category,difficulty,type} = props.quizOptions; //stores the user inputs to state
-    const [score,setScore] = useState(0)
+    const { category, difficulty, type } = quizOptions; //stores the user inputs to state
+    const [score, setScore] = useState(0)
     const [allAnswered, setAllAnswered] = useState(false)
-    
-    
+    const [submitted, setSubmitted] = useState(false);
 
-    useEffect(() =>{
+
+
+    useEffect(() => {
         fetch(`https://opentdb.com/api.php?amount=5&category=${category}&difficulty=${difficulty}&type=${type}`)
-          .then(res => res.json())
-          .then(data => setApiData(data))
-      },[])
+            .then(res => res.json())
+            .then(data => setApiData(data))
+    }, [])
 
 
-    const {results} = apiData
+    const { results } = apiData;
     const [questionsArray, setQuestionsArray] = useState([])
 
     useEffect(
         () => {
             setQuestionsArray(questionsArrayInit)
-        },[results]
+        }, [results]
     )
 
-    useEffect(() =>{
-       // console.log(checkScore(), "checkSCore")
-        const questionAnswered = questionsArray?.every(quiz => quiz.isAnswered)
-        //console.log(questionAnswered)
-        if(questionAnswered){
-            setAllAnswered(prev => !prev)
-            //console.log(questionAnswered)
-        }
-        else{
-            setAllAnswered(false)
-        }
-    },[questionsArray])
-    
+    useEffect(() => {
+        const hasFinished = questionsArray?.every(quiz => quiz.allAnswers.some(ans => ans.isSelected));
+        setAllAnswered(hasFinished);
+        checkScore();
+    }, [questionsArray])
 
-    const questionsArrayInit = results?.map(thisQuestionObject =>{
-        return(
+
+    const questionsArrayInit = results?.map(thisQuestionObject => {
+        return (
             {
                 id: nanoid(),
                 question: thisQuestionObject.question,
                 isAnswered: false,
-                allAnswers: createAllAnswers(thisQuestionObject.incorrect_answers,thisQuestionObject.correct_answer)
+                allAnswers: createAllAnswers(thisQuestionObject.incorrect_answers, thisQuestionObject.correct_answer)
             }
         )
     })
 
     //This function assigns each answer an id,isSelected property and isCorrect property
-    function createAllAnswers(incorrectAnswers,correctAnswer){
-        const allAnswers = [...incorrectAnswers,correctAnswer]
-        const answers = allAnswers.map(thisAnswer =>{
-            return(
+    function createAllAnswers(incorrectAnswers, correctAnswer) {
+        const allAnswers = [...incorrectAnswers, correctAnswer]
+        const answers = allAnswers.map(thisAnswer => {
+            return (
                 {
                     id: nanoid(),
-                    answer:thisAnswer,
+                    answer: thisAnswer,
                     answerCorrect: correctAnswer,
                     isSelected: false,
                     isCorrect: false
@@ -72,42 +67,41 @@ export default function QuizPage(props){
 
     //Function to shuffle the answers array
     function shuffle(array) {
-        let currentIndex = array.length,  randomIndex;
-      
+        let currentIndex = array.length, randomIndex;
+
         // While there remain elements to shuffle.
         while (currentIndex != 0) {
-      
-          // Pick a remaining element.
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex--;
-      
-          // And swap it with the current element.
-          [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
+
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
         }
-      
+
         return array;
     }
 
-    function checkScore(){
-        let correctAnswer = 0
-        questionsArray?.map(thisQuestionObject => {
-            const {allAnswers} = thisQuestionObject
-            allAnswers?.map(thisAnswer => {
-                const {isCorrect, isSelected} = thisAnswer
-                if(isCorrect && isSelected){
-                    correctAnswer ++
+    function checkScore() { // function to update the score
+        let totalScore = 0;
+        questionsArray?.forEach(quiz => {
+            const { allAnswers } = quiz;
+            allAnswers.forEach(ans => {
+                const { isSelected, answer, answerCorrect } = ans;
+                if (isSelected && answer === answerCorrect) {
+                    totalScore += 1;
                 }
             })
         })
-        return correctAnswer
-        
+        setScore(totalScore);
     }
 
-    function checkAnswers(){
+    function checkAnswers() {
         setQuestionsArray(prevArr => {
             return prevArr.map(thisQuestionObject => {
-                const {allAnswers} = thisQuestionObject
+                const { allAnswers } = thisQuestionObject
                 const allAnswersCopy = [...allAnswers]
                 const newAnswers = allAnswersCopy.map(thisAnswer => ({
                     ...thisAnswer,
@@ -121,70 +115,66 @@ export default function QuizPage(props){
         })
     }
 
-    function handleSubmit(){
-        checkAnswers()
-        setTimeout(
-            () => {
-                setScore(prev => prev + checkScore())
-                //console.log(score, "submit")
-            },2000
-        )
+    function handleSubmit() {
+        checkAnswers();
+        setSubmitted(true);
     }
 
-  
-    function handleChoice(questionId, answerId){
-        setQuestionsArray(prevArr => {
-            return prevArr.map(thisQuestionObject => {
-                const {allAnswers} = thisQuestionObject
-                const newAnswers = allAnswers.map(thisAnswer => {
-                    return (
-                        thisAnswer.id === answerId ? 
-                        {
-                            ...thisAnswer,
-                            isSelected: !thisAnswer.isSelected,
-                        } : 
-                        {
-                            ...thisAnswer,
-                            isSelected: thisAnswer.isSelected ? true : false
-                        }
-                    )
-                })
-                return (
-                    thisQuestionObject.id === questionId ?
+    function handleChoice(answerId) {
+        const _allQuestions = [...questionsArray];
+        const questionIndex = _allQuestions.findIndex(quiz => quiz.allAnswers.some(answ => answ.id === answerId));
+        const question = _allQuestions[questionIndex];
+        const { allAnswers } = question;
+        const _answers = allAnswers.map(ans => {
+            return (
+                ans.id === answerId ?
                     {
-                        ...thisQuestionObject,
-                        isAnswered: true,
-                        allAnswers: newAnswers
+                        ...ans,
+                        isSelected: true
                     } :
-                    thisQuestionObject
-                )
-            })
+                    {
+                        ...ans,
+                        isSelected: false
+                    }
+            )
         })
-       
+        question.allAnswers = [..._answers];
+        setQuestionsArray(_allQuestions);
     }
 
 
-    const questions = questionsArray?.map(thisQuestionObject =>{
-        return(
+    const questions = questionsArray?.map(thisQuestionObject => {
+        return (
             <Questions
-                key = {thisQuestionObject.id}
-                questionAnswers = {thisQuestionObject}
-                choice = {handleChoice}
+                key={thisQuestionObject.id}
+                questionAnswers={thisQuestionObject}
+                choice={handleChoice}
             />
         )
     })
 
-   // console.log(questionsArray[0].allAnswers)
-    return(
+    return (
         <div className="question-page">
             <div className="questions-container">
                 {questions}
-                
+                <div className="button-container">
+                    {
+                        !submitted ?
+                            <button className="checkanswers submit" onClick={() => handleSubmit()}
+                                disabled={!allAnswered}
+                            >
+                                Check answers
+                            </button> :
+                            <>
+                                <h4 className="score">You scored {score}/5</h4>
+                                <button className="checkanswers" onClick={() => newQuiz()}>
+                                    PLAY AGAIN
+                                </button>
+                            </>
+
+                    }
+                </div>
             </div>
-            <button className="checkanswers" onClick={() => handleSubmit()}
-                disabled ={!allAnswered}
-            >
-                Check answers</button>
         </div>
     )
 }
